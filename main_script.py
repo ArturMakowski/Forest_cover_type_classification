@@ -116,7 +116,7 @@ def train_knn_model(X_train, y_train, n_neighbors=5):
     return knn_model
 
 # Evaluating the models
-def evaluate_model(model_path, X_test, y_test, cv=None):
+def evaluate_model(model_path, X_test, y_test, X_train, y_train, cv=None):
 
     """Loads the model and evaluates it on the test set.
         args:
@@ -130,7 +130,7 @@ def evaluate_model(model_path, X_test, y_test, cv=None):
     """
     
     model = joblib.load(model_path)
-    return classification_report(y_test,model.predict(X_test)), cross_val_score(model, X_test, y_test, cv=cv)
+    return classification_report(y_test,model.predict(X_test)), cross_val_score(model, X_train, y_train, cv=cv)
 
 # A simple neural network model
 def train_nn_model(X_train, y_train, X_val, y_val, num_nodes, dropout_prob, learning_rate, batch_size, epochs):
@@ -239,6 +239,6 @@ if __name__ == '__main__':
 
     # Evaluate the models
     print(heuristic_model.evaluate(X_test, y_test)) # Heuristic model evaluation
-    print(evaluate_model('log_model.pkl', X_test, y_test)) # Logistic regression model evaluation
-    print(evaluate_model('knn_model.pkl', X_test, y_test)) # KNN model evaluation
+    print(evaluate_model('log_model.pkl', X_test, y_test, X_train, y_train)) # Logistic regression model evaluation
+    print(evaluate_model('knn_model.pkl', X_test, y_test, X_train, y_train)) # KNN model evaluation
     nn_model.evaluate(X_test, y_test) # Neural network model evaluation
