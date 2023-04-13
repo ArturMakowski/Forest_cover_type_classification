@@ -15,7 +15,7 @@ from sklearn.metrics import classification_report
 import tensorflow as tf
 import joblib
 
-DATA_PATH = '/home/armak/Python_projects_WSL/Jobs_internships/OpenX/covtype.data'
+DATA_PATH = '/home/armak/Python_projects_WSL/Forest_cover_type_classification/covtype.data'
 
 # Implementing a simple heuristic model
 class Heuristic:
@@ -35,7 +35,7 @@ class Heuristic:
         """Predicts the most common class"""
         return self.y.value_counts().index[0]
     
-    def accuracy_score(self, X, y):
+    def evaluate(self, X, y):
         """Calculates the accuracy of the model"""
         return np.mean(y == self.predict(X))
 
@@ -227,6 +227,7 @@ if __name__ == '__main__':
     X_train, X_test, X_val, y_train, y_test, y_val = load_data(DATA_PATH, val_data=True)
 
     # Train the models
+    heuristic_model = Heuristic(X_train, y_train)
     log_model = train_logistic_regression_model(X_train, y_train)
     knn_model = train_knn_model(X_train, y_train)
     nn_model, history = train_nn_model(X_train, y_train, X_val, y_val, 128, 0.2, 0.001, 128, 10)
@@ -237,6 +238,7 @@ if __name__ == '__main__':
     nn_model.save('nn_model.h5')
 
     # Evaluate the models
-    print(evaluate_model('log_model.pkl', X_test, y_test))
-    print(evaluate_model('knn_model.pkl', X_test, y_test))
-    nn_model.evaluate(X_test, y_test)
+    print(heuristic_model.evaluate(X_test, y_test)) # Heuristic model evaluation
+    print(evaluate_model('log_model.pkl', X_test, y_test)) # Logistic regression model evaluation
+    print(evaluate_model('knn_model.pkl', X_test, y_test)) # KNN model evaluation
+    nn_model.evaluate(X_test, y_test) # Neural network model evaluation
