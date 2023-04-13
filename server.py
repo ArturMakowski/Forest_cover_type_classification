@@ -25,7 +25,7 @@ def predict():
     input_features = request.json['input_features']
     
     # Convert input features to numpy array
-    input_array = np.array(input_features).reshape(1, -1)
+    input_array = np.array(input_features).reshape((1, -1))
     
     # Make prediction based on selected model
     if selected_model == 'heuristic':
