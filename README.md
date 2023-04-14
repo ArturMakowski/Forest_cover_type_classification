@@ -14,7 +14,7 @@
     - Created a function that will find a good set of hyperparameters for the NN
     - Plotted training curves for the best hyperparameters
 5. Evaluated neural network and other models
-    - Used accuracy, precision, recall, and F1 score
+    - Used accuracy (optionally also precision, recall, and F1 score)
 
 6. Created a very simple REST API that serve these models
     - Users can choose a model - heuristic, two other baseline models, or neural network
