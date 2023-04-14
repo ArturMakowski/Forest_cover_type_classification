@@ -6,6 +6,8 @@ import joblib
 from main_script import Heuristic, load_data
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 app = Flask(__name__)
 
@@ -15,8 +17,13 @@ def predict():
     # Load data and models
     DATA_PATH = 'covtype.data'
 
-    X_train, _, _, y_train, _, _ = load_data(DATA_PATH, val_data=True)
+    # Fit scaler on training data
+    df = pd.read_csv(DATA_PATH, header=None)
+    X = df.iloc[:,:-1]
+    y = df.iloc[:,-1]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=0)
     sc = StandardScaler().fit(X_train) 
+
     heuristic_model = Heuristic(X_train, y_train)
     log_model = joblib.load("log_model.pkl")
     dt_model = joblib.load("dt_model.pkl")

@@ -9,6 +9,14 @@ URL = "http://localhost:5000/predict"
 # load data
 DATA_PATH = 'covtype.data'
 
+class_dir = {0: 'Spruce/Fir', 
+             1: 'Lodgepole Pine', 
+             2: 'Ponderosa Pine', 
+             3: 'Cottonwood/Willow', 
+             4: 'Aspen', 
+             5: 'Douglas-fir', 
+             6: 'Krummholz'}
+
 if __name__ == "__main__":
 
     # open files
@@ -16,7 +24,7 @@ if __name__ == "__main__":
     df.drop(df.columns[-1], axis=1, inplace=True)
 
     # define request payload
-    input_features = df.iloc[507,:].tolist() # define input features
+    input_features = df.iloc[500,:].tolist() # define input features
     selected_model = 'neural_network' # define selected model
 
     payload = json.dumps({
@@ -33,4 +41,4 @@ if __name__ == "__main__":
 
     # Parse response and print predicted output
     predicted_output = response.content.decode('utf-8')
-    print(f'Predicted output by {selected_model}:', predicted_output)
+    print(f'Predicted cover type by {selected_model}:', class_dir[int(predicted_output)])
