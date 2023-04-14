@@ -92,6 +92,8 @@ def train_logistic_regression_model(X_train, y_train):
         args:
             X_train: training feature matrix
             y_train: training target vector
+        returns:
+            log_model: the trained logistic regression model
     """
     
     log_model = LogisticRegression(max_iter=1000)
@@ -100,13 +102,14 @@ def train_logistic_regression_model(X_train, y_train):
     return log_model
 
 # Decision tree training
-def train_dt_model(X_train, y_trai):
+def train_dt_model(X_train, y_train):
 
     """Trains a Decision tree model and saves it to working directory.
         args:
             X_train: training feature matrix
             y_train: training target vector
-            n_neighbors: number of neighbors
+        returns:
+            dt_model: the trained decision tree model
     """
     
     dt_model = DecisionTreeClassifier()
@@ -122,14 +125,13 @@ def evaluate_model(model, X_test, y_test, verbose=False):
             model_path: path to the model
             X_test: test feature matrix
             y_test: test target vector
-            cv: number of folds for cross validation score
+            verbose: whether to print the classification report
         returns:
-            classification_report: classification report
-            cross_val_score: cross validation score
+            accuracy: the accuracy of the model
     """
     
     if verbose:
-        print(f'Classification report: {classification_report(y_test,model.predict(X_test))}')
+        print(f'Classification report for {model}: {classification_report(y_test,model.predict(X_test))}')
     return accuracy_score(y_test,model.predict(X_test))
 
 # A simple neural network model
@@ -195,6 +197,9 @@ def hyperparameter_tuning(X_train, y_train, X_val, y_val):
             y_train: training target vector
             X_val: validation feature matrix
             y_val: validation target vector
+        returns:
+            least_loss_model: the model with the least validation loss
+            least_loss_history: the history object of the model with the least validation loss
     """
     
     least_val_loss = float('inf')
@@ -265,8 +270,8 @@ if __name__ == '__main__':
 
     # Evaluate the models
     print('Heuristic model accuracy: ', np.round(heuristic_model.evaluate(X_test, y_test), 4)) # Heuristic model evaluation
-    print('Logistic regression model accuracy: ', np.round(evaluate_model(log_model, X_test, y_test), 4)) # Logistic regression model evaluation
-    print('Decision tree model accuracy: ', np.round(evaluate_model(dt_model, X_test, y_test), 4)) # Decision tree model evaluation
+    print('Logistic regression model accuracy: ', np.round(evaluate_model(log_model, X_test, y_test, verbose=True), 4)) # Logistic regression model evaluation
+    print('Decision tree model accuracy: ', np.round(evaluate_model(dt_model, X_test, y_test, verbose=True), 4)) # Decision tree model evaluation
     nn_model.evaluate(X_test, y_test) # Neural network model evaluation
 
     # Testing the models
