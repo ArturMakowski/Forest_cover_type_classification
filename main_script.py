@@ -2,16 +2,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import (
     train_test_split,
     KFold,
     StratifiedKFold,
     cross_val_score
 )
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score
 import tensorflow as tf
 import joblib
 
@@ -101,22 +101,22 @@ def train_logistic_regression_model(X_train, y_train):
     joblib.dump(log_model, 'log_model.pkl')
     return log_model
 
-# KNN training
-def train_knn_model(X_train, y_train, n_neighbors=5):
+# Decision tree training
+def train_dt_model(X_train, y_trai):
 
-    """Trains a KNN model and saves it to working directory.
+    """Trains a Decision tree model and saves it to working directory.
         args:
             X_train: training feature matrix
             y_train: training target vector
             n_neighbors: number of neighbors"""
     
-    knn_model = KNeighborsClassifier(n_neighbors=n_neighbors)
-    knn_model.fit(X_train,y_train)
-    joblib.dump(knn_model, 'knn_model.pkl')
-    return knn_model
+    dt_model = DecisionTreeClassifier()
+    dt_model.fit(X_train,y_train)
+    joblib.dump(dt_model, 'dt_model.pkl')
+    return dt_model
 
 # Evaluating the models
-def evaluate_model(model_path, X_test, y_test, X_train, y_train, cv=None):
+def evaluate_model(model_path, X_test, y_test, X_train, y_train, cv=None, verbose=False):
 
     """Loads the model and evaluates it on the test set.
         args:
@@ -130,7 +130,10 @@ def evaluate_model(model_path, X_test, y_test, X_train, y_train, cv=None):
     """
     
     model = joblib.load(model_path)
-    return classification_report(y_test,model.predict(X_test)), cross_val_score(model, X_train, y_train, cv=cv)
+    if verbose:
+        print(f'Classification report: {classification_report(y_test,model.predict(X_test))}')
+    return accuracy_score(y_test,model.predict(X_test))
+# , cross_val_score(model, X_train, y_train, cv=cv)
 
 # A simple neural network model
 def train_nn_model(X_train, y_train, X_val, y_val, num_nodes, dropout_prob, learning_rate, batch_size, epochs):
@@ -185,7 +188,7 @@ def plot_history (history):
     plt.show()
 
 # Hyperparameter tuning function
-def hyperparameter_tuning(model, X_train, y_train, X_val, y_val):
+def hyperparameter_tuning(X_train, y_train, X_val, y_val):
 
     """Tunes the hyperparameters of a neural network model.
         args:
@@ -198,11 +201,11 @@ def hyperparameter_tuning(model, X_train, y_train, X_val, y_val):
     least_val_loss = float('inf')
     least_loss_model = None
     least_loss_history = None
-    epochs = 100
-    for num_nodes in [16, 32, 64]:
+    epochs = 20
+    batch_size = 128
+    for num_nodes in [32, 64]:
         for dropout_prob in [0, 0.2]:
             for lr in [0.005, 0.001]:
-                for batch_size in [64, 128]:
                     print(f'{num_nodes} nodes, dropout {dropout_prob}, learning_rate {lr}, batch_size {batch_size}, ')
                     model, history = train_nn_model(X_train, 
                                                     y_train, 
@@ -228,17 +231,16 @@ if __name__ == '__main__':
 
     # Train the models
     heuristic_model = Heuristic(X_train, y_train)
-    log_model = train_logistic_regression_model(X_train, y_train)
-    knn_model = train_knn_model(X_train, y_train)
-    nn_model, history = train_nn_model(X_train, y_train, X_val, y_val, 128, 0.2, 0.001, 128, 10)
-    plot_history(history)
-    # nn_model, history = hyperparameter_tuning(nn_model, X_train, y_train, X_val, y_val)
-    # nn_model = tf.keras.models.load_model('/home/armak/Python_projects_WSL/Forest_cover_type_classification/nn_model.h5')
-
-    nn_model.save('nn_model.h5')
+    # log_model = train_logistic_regression_model(X_train, y_train)
+    # dt_model = train_dt_model(X_train, y_train)
+    # nn_model, history = train_nn_model(X_train, y_train, X_val, y_val, 128, 0.2, 0.001, 128, 10)
+    # nn_model, history = hyperparameter_tuning(X_train, y_train, X_val, y_val)
+    nn_model = tf.keras.models.load_model('/home/armak/Python_projects_WSL/Forest_cover_type_classification/nn_model.h5')
+    # plot_history(history)
+    # nn_model.save('nn_model.h5')
 
     # Evaluate the models
     print(heuristic_model.evaluate(X_test, y_test)) # Heuristic model evaluation
     print(evaluate_model('log_model.pkl', X_test, y_test, X_train, y_train)) # Logistic regression model evaluation
-    print(evaluate_model('knn_model.pkl', X_test, y_test, X_train, y_train)) # KNN model evaluation
+    print(evaluate_model('dt_model.pkl', X_test, y_test, X_train, y_train)) # Decision tree model evaluation
     nn_model.evaluate(X_test, y_test) # Neural network model evaluation

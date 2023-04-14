@@ -7,7 +7,7 @@
 
 3. Used Scikit-learn library to train two simple Machine Learning models
 
-    - Chose logistic regression and K-nearest neighbours as a baseline
+    - Chose logistic regression and decision tree as a baseline
 4. Used TensorFlow library to train a neural network that classifies the data
 
     - Created a function that will find a good set of hyperparameters for the NN
