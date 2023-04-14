@@ -2,20 +2,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import (
     train_test_split,
-    KFold,
-    StratifiedKFold,
     cross_val_score
 )
 from sklearn.metrics import classification_report, accuracy_score
 import tensorflow as tf
 import joblib
 
-DATA_PATH = '/home/armak/Python_projects_WSL/Forest_cover_type_classification/covtype.data'
+DATA_PATH = 'covtype.data'
 
 # Implementing a simple heuristic model
 class Heuristic:
@@ -94,7 +91,8 @@ def train_logistic_regression_model(X_train, y_train):
     """Trains a logistic regression model and saves it to working directory.
         args:
             X_train: training feature matrix
-            y_train: training target vector"""
+            y_train: training target vector
+    """
     
     log_model = LogisticRegression(max_iter=1000)
     log_model.fit(X_train,y_train)
@@ -108,7 +106,8 @@ def train_dt_model(X_train, y_trai):
         args:
             X_train: training feature matrix
             y_train: training target vector
-            n_neighbors: number of neighbors"""
+            n_neighbors: number of neighbors
+    """
     
     dt_model = DecisionTreeClassifier()
     dt_model.fit(X_train,y_train)
@@ -116,7 +115,7 @@ def train_dt_model(X_train, y_trai):
     return dt_model
 
 # Evaluating the models
-def evaluate_model(model_path, X_test, y_test, X_train, y_train, cv=None, verbose=False):
+def evaluate_model(model, X_test, y_test, verbose=False):
 
     """Loads the model and evaluates it on the test set.
         args:
@@ -129,11 +128,9 @@ def evaluate_model(model_path, X_test, y_test, X_train, y_train, cv=None, verbos
             cross_val_score: cross validation score
     """
     
-    model = joblib.load(model_path)
     if verbose:
         print(f'Classification report: {classification_report(y_test,model.predict(X_test))}')
     return accuracy_score(y_test,model.predict(X_test))
-# , cross_val_score(model, X_train, y_train, cv=cv)
 
 # A simple neural network model
 def train_nn_model(X_train, y_train, X_val, y_val, num_nodes, dropout_prob, learning_rate, batch_size, epochs):
@@ -168,7 +165,8 @@ def plot_history (history):
 
     """Plots the training and validation loss and accuracy.
         args:
-            history: history object returned by model.fit()"""
+            history: history object returned by model.fit()
+    """
     
     fig, (ax1,ax2) = plt.subplots(1,2, figsize=(10,4))
     ax1.plot(history.history['loss'], label='loss')
@@ -196,7 +194,8 @@ def hyperparameter_tuning(X_train, y_train, X_val, y_val):
             X_train: training feature matrix
             y_train: training target vector
             X_val: validation feature matrix
-            y_val: validation target vector"""
+            y_val: validation target vector
+    """
     
     least_val_loss = float('inf')
     least_loss_model = None
@@ -223,6 +222,27 @@ def hyperparameter_tuning(X_train, y_train, X_val, y_val):
                         least_loss_history = history
     return least_loss_model, least_loss_history
 
+def prediction(model, input_features):
+    """Predicts the class of the input features.
+        args:
+            model: the trained model
+            input_features: the input features
+        returns:
+            prediction: the predicted class
+    """
+    
+    if model == 'heuristic':
+        prediction = heuristic_model.predict(input_features)
+    elif model == 'logistic_regression':
+        prediction = log_model.predict(input_features)[0]
+    elif model == 'decision_tree':
+        prediction = dt_model.predict(input_features)[0]
+    elif model == 'neural_network':
+        prediction = np.argmax(nn_model.predict(input_features))
+    else:
+        return "Invalid model selected"
+    return prediction
+
 
 if __name__ == '__main__':
 
@@ -231,17 +251,25 @@ if __name__ == '__main__':
 
     # Train the models
     heuristic_model = Heuristic(X_train, y_train)
-    # log_model = train_logistic_regression_model(X_train, y_train)
-    # dt_model = train_dt_model(X_train, y_train)
-    # nn_model, history = train_nn_model(X_train, y_train, X_val, y_val, 128, 0.2, 0.001, 128, 10)
-    # nn_model, history = hyperparameter_tuning(X_train, y_train, X_val, y_val)
-    # plot_history(history)
-    # nn_model.save('nn_model.h5')
-    nn_model = tf.keras.models.load_model('/home/armak/Python_projects_WSL/Forest_cover_type_classification/nn_model.h5')
+    log_model = train_logistic_regression_model(X_train, y_train)
+    dt_model = train_dt_model(X_train, y_train)
+    # nn_model, history = train_nn_model(X_train, y_train, X_val, y_val, 128, 0.2, 0.001, 128, 10) # Test training
+    nn_model, history = hyperparameter_tuning(X_train, y_train, X_val, y_val)
+    plot_history(history)
+    nn_model.save('nn_model.h5')
 
+    # Load trained models if necesary
+    # log_model = joblib.load("log_model.pkl")
+    # dt_model = joblib.load("dt_model.pkl")
+    # nn_model = tf.keras.models.load_model('nn_model.h5')
 
     # Evaluate the models
-    print(heuristic_model.evaluate(X_test, y_test)) # Heuristic model evaluation
-    print(evaluate_model('log_model.pkl', X_test, y_test, X_train, y_train)) # Logistic regression model evaluation
-    print(evaluate_model('dt_model.pkl', X_test, y_test, X_train, y_train)) # Decision tree model evaluation
+    print('Heuristic model accuracy: ', np.round(heuristic_model.evaluate(X_test, y_test), 4)) # Heuristic model evaluation
+    print('Logistic regression model accuracy: ', np.round(evaluate_model(log_model, X_test, y_test), 4)) # Logistic regression model evaluation
+    print('Decision tree model accuracy: ', np.round(evaluate_model(dt_model, X_test, y_test), 4)) # Decision tree model evaluation
     nn_model.evaluate(X_test, y_test) # Neural network model evaluation
+
+    # Testing the models
+    input_features = X_test[5030,:].reshape((1,-1))
+    print(f'Neural network model prediction: {prediction("neural_network", input_features)}')
+
