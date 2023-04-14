@@ -5,6 +5,7 @@
 
 2. Implemented a very simple heuristic that will classify the data
 
+    - Chose the most common cover type
 3. Used Scikit-learn library to train two simple Machine Learning models
 
     - Chose logistic regression and decision tree as a baseline

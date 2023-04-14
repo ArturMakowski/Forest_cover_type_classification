@@ -235,9 +235,10 @@ if __name__ == '__main__':
     # dt_model = train_dt_model(X_train, y_train)
     # nn_model, history = train_nn_model(X_train, y_train, X_val, y_val, 128, 0.2, 0.001, 128, 10)
     # nn_model, history = hyperparameter_tuning(X_train, y_train, X_val, y_val)
-    nn_model = tf.keras.models.load_model('/home/armak/Python_projects_WSL/Forest_cover_type_classification/nn_model.h5')
     # plot_history(history)
     # nn_model.save('nn_model.h5')
+    nn_model = tf.keras.models.load_model('/home/armak/Python_projects_WSL/Forest_cover_type_classification/nn_model.h5')
+
 
     # Evaluate the models
     print(heuristic_model.evaluate(X_test, y_test)) # Heuristic model evaluation

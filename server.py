@@ -1,3 +1,5 @@
+from markupsafe import escape
+from markupsafe import Markup
 from flask import Flask, request
 import numpy as np
 import joblib
@@ -11,8 +13,8 @@ DATA_PATH = '/home/armak/Python_projects_WSL/Forest_cover_type_classification/co
 
 X_train, _, _, y_train, _, _ = load_data(DATA_PATH, val_data=True)
 heuristic_model = Heuristic(X_train, y_train)
-log_model = joblib.load("linear_model.pkl")
-knn_model = joblib.load("knn_model.pkl")
+log_model = joblib.load("log_model.pkl")
+dt_model = joblib.load("dt_model.pkl")
 nn_model = tf.keras.models.load_model('/home/armak/Python_projects_WSL/Forest_cover_type_classification/nn_model.h5')
 
 
@@ -32,8 +34,8 @@ def predict():
         prediction = heuristic_model.predict(input_array)
     elif selected_model == 'logistic_regression':
         prediction = log_model.predict(input_array)
-    elif selected_model == 'knn':
-        prediction = knn_model.predict(input_array)
+    elif selected_model == 'decision_tree':
+        prediction = dt_model.predict(input_array)
     elif selected_model == 'neural_network':
         prediction = nn_model.predict(input_array)
     else:
