@@ -242,7 +242,7 @@ def prediction(model, input_features):
         prediction = log_model.predict(input_features)[0]
     elif model == 'decision_tree':
         prediction = dt_model.predict(input_features)[0]
-    elif model == 'neural_network':
+    elif model == 'neural_network' and nn_model is not None:
         prediction = np.argmax(nn_model.predict(input_features))
     else:
         return "Invalid model selected"
@@ -261,7 +261,8 @@ if __name__ == '__main__':
     # nn_model, history = train_nn_model(X_train, y_train, X_val, y_val, 128, 0.2, 0.001, 128, 10) # Test training
     nn_model, history = hyperparameter_tuning(X_train, y_train, X_val, y_val)
     plot_history(history)
-    nn_model.save('nn_model.h5')
+    if nn_model is not None:
+        nn_model.save('nn_model.h5')
 
     # Load trained models if necesary
     # log_model = joblib.load("log_model.pkl")
@@ -272,9 +273,10 @@ if __name__ == '__main__':
     print('Heuristic model accuracy: ', np.round(heuristic_model.evaluate(X_test, y_test), 4)) # Heuristic model evaluation
     print('Logistic regression model accuracy: ', np.round(evaluate_model(log_model, X_test, y_test, verbose=True), 4)) # Logistic regression model evaluation
     print('Decision tree model accuracy: ', np.round(evaluate_model(dt_model, X_test, y_test, verbose=True), 4)) # Decision tree model evaluation
-    nn_model.evaluate(X_test, y_test) # Neural network model evaluation
+    if nn_model is not None:
+        nn_model.evaluate(X_test, y_test) # Neural network model evaluation
 
     # Testing the models
-    input_features = X_test[5030,:].reshape((1,-1))
+    input_features = X_test[5030,:].reshape((1,-1)) # type: ignore
     print(f'Neural network model prediction: {prediction("neural_network", input_features)}')
 
